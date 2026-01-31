@@ -1,0 +1,263 @@
+import { useAlgoStore } from '../store/useAlgoStore';
+
+export class AlgorithmController {
+    constructor() {
+        this.generator = null;
+        this.isExecuting = false;
+        this.currentData = null;
+    }
+
+    async loadAlgorithm(AlgorithmClass) {
+        this.CurrentAlgoClass = AlgorithmClass;
+        
+        const algo = new AlgorithmClass();
+        const initialData = algo.initialize();
+        this.currentData = initialData;
+
+        const entities = algo.mapToVisual(initialData);
+        
+        useAlgoStore.getState().setAlgorithm(algo);
+        useAlgoStore.getState().updateVisualState({ 
+            entities,
+            narrative: `Loaded: ${algo.name}`
+        });
+
+        this.generator = algo.execute(initialData);
+    }
+
+    async play() {
+        if (!this.generator || this.isExecuting) return;
+        
+        this.isExecuting = true;
+        useAlgoStore.getState().play();
+
+        while (this.isExecuting) {
+            const { value: frame, done } = this.generator.next();
+            
+            if (done) {
+                useAlgoStore.getState().setComplete();
+                this.isExecuting = false;
+                break;
+            }
+
+            await this.processFrame(frame);
+
+            // Respect pause
+            while (useAlgoStore.getState().isPaused) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+
+            // Check if stopped
+            if (!useAlgoStore.getState().isPlaying) {
+                this.isExecuting = false;
+                break;
+            }
+        }
+    }
+
+    async processFrame(frame) {
+        const store = useAlgoStore.getState();
+        const speed = store.speed;
+        const baseDuration = 800 / speed;
+
+        switch (frame.type) {
+            case 'compare':
+                this.updateEntityStates(frame.targets, 'compare');
+                store.updateVisualState({ 
+                    activeIndices: frame.targets,
+                    narrative: frame.narrative 
+                });
+                await this.wait(baseDuration * 0.5);
+                this.updateEntityStates(frame.targets, 'default');
+                break;
+
+            case 'swap':
+                this.updateEntityStates(frame.targets, 'swap');
+                store.updateVisualState({ narrative: frame.narrative });
+                await this.animateSwap(frame.targets, baseDuration);
+                this.updateEntityStates(frame.targets, 'default');
+                break;
+
+            case 'highlight_code':
+                store.updateVisualState({ highlightedCode: frame.line });
+                break;
+
+            case 'delay':
+                await this.wait(frame.duration / speed);
+                break;
+
+            case 'celebrate':
+                this.updateEntityStates(frame.targets, 'sorted');
+                await this.wait(50 / speed);
+                break;
+
+            case 'complete':
+                store.updateVisualState({ narrative: frame.narrative });
+                break;
+
+            case 'activate_node':
+            case 'visit_node':
+                // Find entity by ID suffix (e.g. "node-0")
+                this.updateNodeState(frame.id, 'active');
+                store.updateVisualState({ narrative: frame.narrative });
+                await this.wait(500 / speed);
+                if (frame.type === 'visit_node') {
+                     this.updateNodeState(frame.id, 'visited');
+                }
+                break;
+
+            case 'highlight_edge':
+                // Find the edge entity (id format: edge-from-to)
+                const edgeId = `edge-${frame.from}-${frame.to}`;
+                this.updateEdgeState(edgeId, true);
+                store.updateVisualState({ narrative: frame.narrative });
+                await this.wait(300 / speed);
+
+                break;
+
+            case 'update_tile':
+                this.updateTileState(frame.id, frame.state);
+                if(frame.narrative) store.updateVisualState({ narrative: frame.narrative });
+                break;
+
+            case 'activate_pillar':
+                this.updatePillarState(frame.id, frame.state);
+                if (frame.narrative) store.updateVisualState({ narrative: frame.narrative });
+                break;
+
+            case 'overwrite':
+                this.updatePillarHeight(frame.index, frame.value);
+                if(frame.narrative) store.updateVisualState({ narrative: frame.narrative });
+                await this.wait(100 / speed); // Fast update
+                break;
+        }
+
+        store.nextStep();
+    }
+
+    updateEntityStates(indices, state) {
+        const store = useAlgoStore.getState();
+        const entities = [...store.visualState.entities];
+        
+        indices.forEach(idx => {
+            if (entities[idx]) {
+                entities[idx] = { ...entities[idx], state };
+            }
+        });
+
+        store.updateVisualState({ entities });
+    }
+
+    updateNodeState(nodeId, state) {
+        const store = useAlgoStore.getState();
+        const entities = store.visualState.entities.map(e => {
+            if (e.id === `node-${nodeId}`) {
+                return { ...e, state };
+            }
+            return e;
+        });
+        store.updateVisualState({ entities });
+    }
+
+    updateEdgeState(edgeId, active) {
+        const store = useAlgoStore.getState();
+        const entities = store.visualState.entities.map(e => {
+            if (e.id === edgeId) {
+                return { ...e, active };
+            }
+            return e;
+        });
+        store.updateVisualState({ entities });
+    }
+
+    updateTileState(tileId, state) {
+        const store = useAlgoStore.getState();
+        const entities = store.visualState.entities.map(e => {
+            if (e.id === `tile-${tileId}`) {
+                return { ...e, state };
+            }
+            return e;
+        });
+        store.updateVisualState({ entities });
+    }
+
+    updatePillarState(index, state) {
+        const store = useAlgoStore.getState();
+        const entities = [...store.visualState.entities];
+        
+        if (entities[index]) {
+            entities[index] = { ...entities[index], state };
+        }
+        store.updateVisualState({ entities });
+    }
+
+    updatePillarHeight(index, height) {
+    const store = useAlgoStore.getState();
+    const entities = [...store.visualState.entities];
+    
+    if (entities[index]) {
+        // We assume Pillar component reacts to 'height' prop change
+        // We might need to trigger a re-render or animate it.
+        // For simple React, updating state works.
+        entities[index] = { 
+            ...entities[index], 
+            height: height,
+            value: height, // Keep value synced
+            state: 'swap' // Flash it rose gold to show change
+        };
+    }
+    store.updateVisualState({ entities });
+    
+    // Quick reset of color
+    setTimeout(() => {
+        const current = useAlgoStore.getState().visualState.entities;
+        if(current[index]) {
+             current[index] = { ...current[index], state: 'default' };
+             useAlgoStore.getState().updateVisualState({ entities: current });
+        }
+    }, 100);
+}
+
+    async animateSwap(indices, duration) {
+        const store = useAlgoStore.getState();
+        const entities = [...store.visualState.entities];
+        const [idxA, idxB] = indices;
+
+        // Swap positions in the data
+        [entities[idxA], entities[idxB]] = [entities[idxB], entities[idxA]];
+        
+        // Update positions for smooth transition
+        const tempPos = entities[idxA].position;
+        entities[idxA].position = entities[idxB].position;
+        entities[idxB].position = tempPos;
+
+        store.updateVisualState({ entities });
+        
+        await this.wait(duration);
+    }
+
+    wait(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    pause() {
+        useAlgoStore.getState().pause();
+    }
+
+    reset() {
+        // 1. Stop everything
+        this.isExecuting = false;
+        this.generator = null;
+        
+        // 2. Clear State
+        useAlgoStore.getState().reset();
+        
+        // 3. RELOAD immediately
+        if (this.CurrentAlgoClass) {
+            // Small delay to let the clear animation play (optional)
+            setTimeout(() => {
+                this.loadAlgorithm(this.CurrentAlgoClass);
+            }, 100);
+        }
+    }
+}

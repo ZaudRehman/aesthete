@@ -1,0 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=Italiana&family=JetBrains+Mono:wght@300;400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --gold: #D4AF37;
+  --black: #0a0a0a;
+}
+
+body {
+  background-color: #f2f2f2; /* Ultra-light grey, almost white */
+  color: var(--black);
+  cursor: crosshair; /* Precision feel */
+}
+
+/* --- Typography --- */
+.font-display {
+  font-family: 'Italiana', serif;
+}
+
+.font-tech {
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: -0.05em;
+}
+
+/* --- The "Invisible" UI --- */
+/* We don't use cards. We use frosted glass that is barely there. */
+.glass-editorial {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  border-left: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* --- Code Styling --- */
+.code-line {
+  opacity: 0.4;
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  border-left: 2px solid transparent;
+  padding-left: 1rem;
+}
+
+.code-active {
+  opacity: 1;
+  color: #000;
+  border-left: 2px solid var(--gold);
+  transform: translateX(10px);
+  font-weight: 400;
+}
+
+/* --- Animations --- */
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.appear {
+  animation: slideUp 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aesthete | Algorithm Museum</title>
+    
+    <!-- 1. Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Italiana&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+    
+    <!-- 2. Tailwind CDN (Emergency Bypass for Styles) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              display: ['Italiana', 'serif'],
+              mono: ['JetBrains Mono', 'monospace'],
+            },
+            colors: {
+              gold: '#D4AF37',
+              black: '#0a0a0a'
+            }
+          }
+        }
+      }
+    </script>
+
+    <!-- 3. Global Reset Styles -->
+    <style>
+      body { 
+        margin: 0; 
+        background-color: #f2f2f2; 
+        overflow: hidden; 
+      }
+      #root {
+        width: 100vw;
+        height: 100vh;
+      }
+      
+      /* Glass Utility */
+      .glass-editorial {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+      }
+      
+      /* Code Line Animations */
+      .code-line { 
+        transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1); 
+        border-left: 2px solid transparent; 
+        padding-left: 10px; 
+        opacity: 0.5;
+      }
+      .code-active { 
+        border-left-color: #D4AF37; 
+        font-weight: bold; 
+        color: black; 
+        transform: translateX(5px); 
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- The React App Mount Point -->
+    <div id="root"></div>
+    
+    <!-- The Entry Script -->
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
