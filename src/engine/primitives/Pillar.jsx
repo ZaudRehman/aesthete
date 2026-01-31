@@ -11,6 +11,12 @@ const NEGATIVE_MATERIAL = new THREE.MeshStandardMaterial({
     metalness: 0.1,
 });
 
+const VISITED_MATERIAL = new THREE.MeshStandardMaterial({
+    color: '#60a5fa', // Blue-400
+    roughness: 0.4,
+    metalness: 0.2,
+});
+
 export const Pillar = ({ height, position, state = 'default', id, value }) => {
     
     // Fallback height to prevent crash
@@ -39,6 +45,7 @@ export const Pillar = ({ height, position, state = 'default', id, value }) => {
     if (state === 'sorted') activeMaterial = GOLD_MATERIAL;
     if (state === 'left') activeMaterial = LEFT_MATERIAL;
     if (state === 'right') activeMaterial = RIGHT_MATERIAL;
+    if (state === 'visited') activeMaterial = VISITED_MATERIAL;
 
     // Calculate Y-offset:
     // If Positive: Center is at h/2

@@ -120,6 +120,12 @@ export class AlgorithmController {
                 if(frame.narrative) store.updateVisualState({ narrative: frame.narrative });
                 break;
 
+             case 'update_visual':
+                this.updateEntityProps(frame.id, frame);
+                if (frame.narrative) store.updateVisualState({ narrative: frame.narrative });
+                await this.wait(100 / speed);
+                break;
+
             case 'activate_pillar':
                 this.updatePillarState(frame.id, frame.state);
                 if (frame.narrative) store.updateVisualState({ narrative: frame.narrative });
@@ -128,6 +134,22 @@ export class AlgorithmController {
             case 'activate_sphere':
                 this.updateSphereState(frame.id, frame.state);
                 if (frame.narrative) store.updateVisualState({ narrative: frame.narrative });
+                break;
+
+            case 'move':
+                this.updateFramePosition(frame.id, frame.position);
+                if (frame.narrative) store.updateVisualState({ narrative: frame.narrative });
+                break;
+
+            case 'activate_orb':
+                this.updateOrbState(frame.id, frame.state);
+                if (frame.narrative) store.updateVisualState({ narrative: frame.narrative });
+                break;
+
+            case 'update_height':
+                this.updatePillarHeightById(frame.id, frame.height);
+                if (frame.narrative) store.updateVisualState({ narrative: frame.narrative });
+                await this.wait(200 / speed);
                 break;
 
             case 'overwrite':
@@ -186,13 +208,24 @@ export class AlgorithmController {
         store.updateVisualState({ entities });
     }
 
-    updatePillarState(index, state) {
+    updatePillarState(indexOrId, state) {
         const store = useAlgoStore.getState();
         const entities = [...store.visualState.entities];
         
-        if (entities[index]) {
-            entities[index] = { ...entities[index], state };
+        // Check if it's a numeric index or an ID string
+        if (typeof indexOrId === 'number') {
+            // Old behavior: index-based
+            if (entities[indexOrId]) {
+                entities[indexOrId] = { ...entities[indexOrId], state };
+            }
+        } else {
+            // New behavior: ID-based (for LCS cells)
+            const index = entities.findIndex(e => e.id === indexOrId);
+            if (index !== -1) {
+                entities[index] = { ...entities[index], state };
+            }
         }
+        
         store.updateVisualState({ entities });
     }
 
@@ -232,6 +265,52 @@ export class AlgorithmController {
         });
         store.updateVisualState({ entities });
     }
+
+    updateFramePosition(frameId, position) {
+        const store = useAlgoStore.getState();
+        const entities = store.visualState.entities.map(e => {
+            if (e.id === frameId) {
+                return { ...e, position };
+            }
+            return e;
+        });
+        store.updateVisualState({ entities });
+    }
+
+    updateEntityProps(id, props) {
+        const store = useAlgoStore.getState();
+        const entities = store.visualState.entities.map(e => {
+            if (e.id === id) {
+                const { type: _t, narrative: _n, duration: _d, ...visualUpdates } = props;
+                return { ...e, ...visualUpdates };
+            }
+            return e;
+        });
+        store.updateVisualState({ entities });
+    }
+
+    updateOrbState(orbId, state) {
+        const store = useAlgoStore.getState();
+        const entities = store.visualState.entities.map(e => {
+            if (e.id === orbId) {
+                return { ...e, state };
+            }
+            return e;
+        });
+        store.updateVisualState({ entities });
+    }
+
+    updatePillarHeightById(pillarId, height) {
+        const store = useAlgoStore.getState();
+        const entities = store.visualState.entities.map(e => {
+            if (e.id === pillarId) {
+                return { ...e, height };
+            }
+            return e;
+        });
+        store.updateVisualState({ entities });
+    }
+
 
     async animateSwap(indices, duration) {
         const store = useAlgoStore.getState();

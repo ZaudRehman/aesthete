@@ -5,6 +5,7 @@ import { Pillar } from './engine/primitives/Pillar';
 import { Orb } from './engine/primitives/Orb';
 import { GlassTile } from './engine/primitives/GlassTile';
 import { Sphere } from './engine/primitives/Sphere';
+import { WindowFrame } from './engine/primitives/WindowFrame';
 import { CodeCard } from './components/CodeCard';
 import { NarrativeLog } from './components/NarrativeLog';
 import { PlaybackControls } from './components/PlaybackControls';
@@ -51,7 +52,7 @@ function App() {
       
       {/* 1. Background Watermark (Dynamic) */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 opacity-[0.03]">
-        <h1 className="font-display text-[25vw] text-black leading-none select-none uppercase truncate max-w-full text-center">
+        <h1 className="font-display text-[15vw] text-black leading-none select-none uppercase truncate max-w-full text-center tracking-tighter">
           {currentAlgo?.category ? currentAlgo.category.split(' ')[0] : 'SORT'}
         </h1>
       </div>
@@ -102,6 +103,16 @@ function App() {
                 }
                 if (entity.type === 'sphere') {
                     return <Sphere key={entity.id} {...entity} />;
+                }
+                if (entity.type === 'window_frame') {
+                  return (
+                        <WindowFrame 
+                            key={entity.id}
+                            position={entity.position}
+                            width={entity.width}
+                            height={entity.height || 7}
+                        />
+                    );
                 }
                 return null;
             })}
