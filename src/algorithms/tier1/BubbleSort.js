@@ -6,9 +6,21 @@ export class BubbleSort extends AlgorithmBase {
         this.name = "Bubble Sort";
         this.tier = 1;
         this.category = "Sorting";
-        this.description = "Repeatedly steps through the list...";
+        this.description = "A simple sorting algorithm that repeatedly steps through the list, compares adjacent elements and swaps them if they are in the wrong order.";
+
+        this.details = {
+            complexity: {
+                time: "O(n²)",
+                space: "O(1)"
+            },
+            useCases: [
+                "Educational purposes: Teaching the concept of sorting",
+                "Computer Graphics: Polygon filling algorithms",
+                "Detecting if a list is already sorted (Optimized version is O(n))"
+            ],
+            keyConcept: "Bubbling: Largest unsorted element 'bubbles up' to its correct position at the end of the array in each pass."
+        };
         
-        // Changed: 'code' is now an object map
         this.code = {
             rust: `fn bubble_sort(arr: &mut [i32]) {
     let n = arr.len();

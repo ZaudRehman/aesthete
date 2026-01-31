@@ -27,3 +27,21 @@ export const ROSE_GOLD_MATERIAL = new THREE.MeshStandardMaterial({
     emissive: 0xB76E79,
     emissiveIntensity: 0.1
 });
+
+// 4. Left Partition (Cyan - "Ice")
+export const LEFT_MATERIAL = new THREE.MeshStandardMaterial({
+    color: 0x00ffff,
+    metalness: 0.8,
+    roughness: 0.2,
+    emissive: 0x004444,
+    emissiveIntensity: 0.2
+});
+
+// 5. Right Partition (Magenta - "Fire")
+export const RIGHT_MATERIAL = new THREE.MeshStandardMaterial({
+    color: 0xff00ff,
+    metalness: 0.8,
+    roughness: 0.2,
+    emissive: 0x440044,
+    emissiveIntensity: 0.2
+});

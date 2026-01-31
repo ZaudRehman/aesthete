@@ -6,7 +6,20 @@ export class QuickSort extends AlgorithmBase {
         this.name = "Quick Sort";
         this.tier = 2;
         this.category = "Sorting";
-        this.description = "Efficient divide-and-conquer sort using a pivot element.";
+        this.description = "Picks a pivot element and partitions the array such that smaller elements are left and larger are right.";
+        
+        this.details = {
+            complexity: {
+                time: "O(n log n) (avg)",
+                space: "O(log n)"
+            },
+            useCases: [
+                "General purpose sorting (standard in many libraries like C++ STL)",
+                "Systems with good cache locality requirements",
+                "Sorting primitive types (where stability isn't needed)"
+            ],
+            keyConcept: "Partitioning: The core magic is putting the 'Pivot' exactly where it belongs, ensuring everything to its left is smaller and everything to its right is larger."
+        };
         
         this.code = {
             python: `def quick_sort(arr, low, high):

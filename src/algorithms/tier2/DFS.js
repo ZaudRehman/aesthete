@@ -6,7 +6,20 @@ export class DFS extends AlgorithmBase {
         this.name = "Depth First Search";
         this.tier = 2;
         this.category = "Graph Theory";
-        this.description = "Explores as deep as possible along each branch before backtracking.";
+        this.description = "Explores as far as possible along each branch before backtracking.";
+        
+        this.details = {
+            complexity: {
+                time: "O(V + E)",
+                space: "O(V) (Recursion Stack)"
+            },
+            useCases: [
+                "Maze Solving (finding any path to exit)",
+                "Topological Sorting (Dependency resolution)",
+                "Detecting Cycles in a graph"
+            ],
+            keyConcept: "Backtracking: Dive deep into a path until you hit a dead end, then step back and try the next available path."
+        };
         
         this.code = {
             rust: `fn dfs(graph: &Graph, start: usize, visited: &mut HashSet<usize>) {

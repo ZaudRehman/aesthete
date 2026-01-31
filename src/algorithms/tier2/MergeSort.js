@@ -4,9 +4,24 @@ export class MergeSort extends AlgorithmBase {
     constructor() {
         super();
         this.name = "Merge Sort";
+        this.name = "Merge Sort";
         this.tier = 2;
         this.category = "Sorting";
-        this.description = "Divide and conquer algorithm that splits arrays and merges them in sorted order.";
+        this.description = "Recursively divides array into halves, sorts them, and merges sorted halves.";
+        
+        this.details = {
+            complexity: {
+                time: "O(n log n)",
+                space: "O(n)"
+            },
+            useCases: [
+                "Sorting large datasets (External Sorting)",
+                "Implementing stable sorts (preserves order of equal elements)",
+                "Inversion Counting (measure of how sorted an array is)"
+            ],
+            keyConcept: "Divide and Conquer: It's easier to merge two sorted piles of cards than to sort a messy pile from scratch."
+        };
+        
         
         this.code = {
             python: `def merge_sort(arr):
@@ -64,6 +79,7 @@ export class MergeSort extends AlgorithmBase {
     }
 
     initialize() {
+        // Power of 2 length makes merge sort look cleaner
         const values = Array.from({ length: 16 }, () => Math.floor(Math.random() * 8) + 2);
         return { type: 'array', values };
     }
@@ -84,9 +100,6 @@ export class MergeSort extends AlgorithmBase {
     }
 
     *execute(data) {
-        // We simulate the recursive Merge Sort on the main array
-        // We will highlight the range [left, right] currently being merged
-        
         const arr = [...data.values];
         const auxiliaryArray = [...arr];
 
@@ -102,61 +115,89 @@ export class MergeSort extends AlgorithmBase {
         }
 
         function* merge(mainArray, startIdx, middleIdx, endIdx, auxiliaryArray) {
+            
+            // 1. VISUALIZATION PREP: Color the two groups
+            // Left Group: startIdx -> middleIdx (Cyan)
+            // Right Group: middleIdx + 1 -> endIdx (Magenta)
+            
+            for(let x = startIdx; x <= endIdx; x++) {
+                if (x <= middleIdx) {
+                    yield { type: 'activate_pillar', id: x, state: 'left' };
+                } else {
+                    yield { type: 'activate_pillar', id: x, state: 'right' };
+                }
+            }
+            yield { 
+                type: 'delay', 
+                duration: 400, 
+                narrative: `Merging Groups: [${startIdx}-${middleIdx}] and [${middleIdx+1}-${endIdx}]` 
+            };
+
             let k = startIdx;
             let i = startIdx;
             let j = middleIdx + 1;
             
-            yield { type: 'highlight_code', line: 8 }; // merge call
-            
+            yield { type: 'highlight_code', line: 8 };
+
             while (i <= middleIdx && j <= endIdx) {
-                // Visual: Highlight the two being compared
+                // Highlight comparison
                 yield { 
                     type: 'compare', 
                     targets: [i, j], 
-                    narrative: `Merging range [${startIdx}-${endIdx}]: ${auxiliaryArray[i]} vs ${auxiliaryArray[j]}` 
+                    narrative: `Comparing Left (${auxiliaryArray[i]}) vs Right (${auxiliaryArray[j]})` 
                 };
-
+                
                 if (auxiliaryArray[i] <= auxiliaryArray[j]) {
-                    // Overwrite value in main array (Visual update)
+                    // Taking from LEFT
                     mainArray[k] = auxiliaryArray[i];
                     yield { 
-                        type: 'overwrite', // NEW EVENT
+                        type: 'overwrite', 
                         index: k, 
                         value: auxiliaryArray[i],
-                        narrative: `Setting index ${k} to ${auxiliaryArray[i]}`
+                        narrative: `Left Value ${auxiliaryArray[i]} is smaller. Placing at ${k}.`
                     };
                     i++;
                 } else {
+                    // Taking from RIGHT
                     mainArray[k] = auxiliaryArray[j];
-                     yield { 
+                    yield { 
                         type: 'overwrite', 
                         index: k, 
                         value: auxiliaryArray[j],
-                         narrative: `Setting index ${k} to ${auxiliaryArray[j]}`
+                        narrative: `Right Value ${auxiliaryArray[j]} is smaller. Placing at ${k}.`
                     };
                     j++;
                 }
                 k++;
             }
             
+            // Collect remaining
             while (i <= middleIdx) {
                 mainArray[k] = auxiliaryArray[i];
-                yield { type: 'overwrite', index: k, value: auxiliaryArray[i] };
+                yield { type: 'overwrite', index: k, value: auxiliaryArray[i], narrative: "Collecting remaining Left values" };
                 i++;
                 k++;
             }
             while (j <= endIdx) {
                 mainArray[k] = auxiliaryArray[j];
-                yield { type: 'overwrite', index: k, value: auxiliaryArray[j] };
+                yield { type: 'overwrite', index: k, value: auxiliaryArray[j], narrative: "Collecting remaining Right values" };
                 j++;
                 k++;
             }
+
+            // Cleanup: Turn them back to default (or sorted gold)
+            for(let x = startIdx; x <= endIdx; x++) {
+                yield { type: 'activate_pillar', id: x, state: 'default' };
+            }
         }
 
+        yield { type: 'activate_node', id: 0, narrative: "Initializing Merge Sort" };
         yield* doMerge(arr, 0, arr.length - 1, auxiliaryArray);
+        
         yield { type: 'complete', narrative: "Merge Sort Complete." };
         
-         for (let k = 0; k < arr.length; k++) {
+        // Final celebration
+        for (let k = 0; k < arr.length; k++) {
             yield { type: 'celebrate', targets: [k] };
         }
     }

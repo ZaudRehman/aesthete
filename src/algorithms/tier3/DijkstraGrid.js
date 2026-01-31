@@ -3,10 +3,23 @@ import { AlgorithmBase } from '../AlgorithmBase';
 export class DijkstraGrid extends AlgorithmBase {
     constructor() {
         super();
-        this.name = "Dijkstra (Grid)";
+        this.name = "Dijkstra's Algorithm";
         this.tier = 3;
         this.category = "Pathfinding";
-        this.description = "Finds the shortest path in a weighted graph (or grid).";
+        this.description = "Finds the shortest path between nodes in a graph, guaranteeing the optimal route.";
+        
+        this.details = {
+            complexity: {
+                time: "O(E + V log V)",
+                space: "O(V)"
+            },
+            useCases: [
+                "GPS Satellite Navigation (Google Maps)",
+                "IP Routing (OSPF protocol)",
+                "Telephone Network Routing"
+            ],
+            keyConcept: "Greedy Exploration: Always expand the closest unvisited node. Like pouring water on the floor, it finds the lowest point naturally."
+        };
         
         this.code = {
             python: `def dijkstra(grid, start, end):

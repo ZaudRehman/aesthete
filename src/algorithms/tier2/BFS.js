@@ -6,9 +6,21 @@ export class BFS extends AlgorithmBase {
         this.name = "Breadth First Search";
         this.tier = 2;
         this.category = "Graph Theory";
-        this.description = "Explores a graph layer by layer, starting from a root node.";
+        this.description = "Explores a graph layer by layer, starting from a source node.";
         
-        // Multi-language Support
+        this.details = {
+            complexity: {
+                time: "O(V + E)",
+                space: "O(V)"
+            },
+            useCases: [
+                "Shortest Path in unweighted graphs (GPS navigation)",
+                "Social Network Analysis (Finding 'degrees of separation')",
+                "Web Crawlers (Exploring links level by level)"
+            ],
+            keyConcept: "Level-Order Traversal: BFS visits neighbors before neighbors' neighbors, spreading like a ripple in water."
+        };
+        
         this.code = {
             rust: `fn bfs(graph: &Graph, start: usize) {
     let mut queue = VecDeque::new();

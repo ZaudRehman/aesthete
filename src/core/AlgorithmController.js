@@ -125,10 +125,15 @@ export class AlgorithmController {
                 if (frame.narrative) store.updateVisualState({ narrative: frame.narrative });
                 break;
 
+            case 'activate_sphere':
+                this.updateSphereState(frame.id, frame.state);
+                if (frame.narrative) store.updateVisualState({ narrative: frame.narrative });
+                break;
+
             case 'overwrite':
                 this.updatePillarHeight(frame.index, frame.value);
                 if(frame.narrative) store.updateVisualState({ narrative: frame.narrative });
-                await this.wait(100 / speed); // Fast update
+                await this.wait(150 / speed);
                 break;
         }
 
@@ -192,31 +197,41 @@ export class AlgorithmController {
     }
 
     updatePillarHeight(index, height) {
-    const store = useAlgoStore.getState();
-    const entities = [...store.visualState.entities];
+        const store = useAlgoStore.getState();
+        const entities = [...store.visualState.entities];
     
-    if (entities[index]) {
-        // We assume Pillar component reacts to 'height' prop change
-        // We might need to trigger a re-render or animate it.
-        // For simple React, updating state works.
-        entities[index] = { 
-            ...entities[index], 
-            height: height,
-            value: height, // Keep value synced
-            state: 'swap' // Flash it rose gold to show change
-        };
-    }
-    store.updateVisualState({ entities });
-    
-    // Quick reset of color
-    setTimeout(() => {
-        const current = useAlgoStore.getState().visualState.entities;
-        if(current[index]) {
-             current[index] = { ...current[index], state: 'default' };
-             useAlgoStore.getState().updateVisualState({ entities: current });
+        if (entities[index]) {
+            entities[index] = { 
+                ...entities[index],
+                height: height,
+                value: height,
+                state: 'overwrite' 
+            };
         }
-    }, 100);
-}
+
+        store.updateVisualState({ entities });
+
+        setTimeout(() => {
+            const currentEntities = useAlgoStore.getState().visualState.entities;
+            if(currentEntities[index]) {
+                const resetEntities = [...currentEntities];
+                resetEntities[index] = { ...resetEntities[index], state: 'default' };
+                useAlgoStore.getState().updateVisualState({ entities: resetEntities });
+            }
+        }, 300);
+    }
+
+    updateSphereState(indexOrId, state) {
+        const store = useAlgoStore.getState();
+        const entities = store.visualState.entities.map(e => {
+            // Check if it matches by index (sphere-0) or if the ID was passed directly
+            if (e.id === `sphere-${indexOrId}` || e.id === indexOrId) {
+                return { ...e, state };
+            }
+            return e;
+        });
+        store.updateVisualState({ entities });
+    }
 
     async animateSwap(indices, duration) {
         const store = useAlgoStore.getState();

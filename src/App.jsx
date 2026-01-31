@@ -4,18 +4,21 @@ import { StudioScene } from './core/StudioScene';
 import { Pillar } from './engine/primitives/Pillar';
 import { Orb } from './engine/primitives/Orb';
 import { GlassTile } from './engine/primitives/GlassTile';
+import { Sphere } from './engine/primitives/Sphere';
 import { CodeCard } from './components/CodeCard';
 import { NarrativeLog } from './components/NarrativeLog';
 import { PlaybackControls } from './components/PlaybackControls';
+import { InfoPanel } from './components/InfoPanel';
 import { useAlgoStore } from './store/useAlgoStore';
 import { AlgorithmController } from './core/AlgorithmController';
 import { BubbleSort } from './algorithms/tier1/BubbleSort';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { NavigationMenu } from './components/NavigationMenu';
 import { Line } from '@react-three/drei'; 
 
 function App() {
-  const { visualState, currentAlgo } = useAlgoStore(); // Get currentAlgo for dynamic title
+  const { visualState, currentAlgo } = useAlgoStore(); 
+  const [showInfo, setShowInfo] = useState(false);
   const controllerRef = useRef(new AlgorithmController());
 
   useEffect(() => {
@@ -37,6 +40,14 @@ function App() {
     <div className="w-screen h-screen relative bg-[#f2f2f2] overflow-hidden">
       
       <NavigationMenu />
+
+      {/* Info Panel Modal */}
+      {showInfo && (
+          <InfoPanel 
+              algorithm={currentAlgo} 
+              onClose={() => setShowInfo(false)} 
+          />
+      )}
       
       {/* 1. Background Watermark (Dynamic) */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 opacity-[0.03]">
@@ -52,13 +63,13 @@ function App() {
           
           <group position={[0, -2, 0]}>
             {visualState.entities.map((entity) => {
-                // Conditional Rendering based on Entity Type
                 if (entity.type === 'pillar') {
                     return (
                         <Pillar 
                             key={entity.id}
                             id={entity.id}
                             height={entity.height}
+                            value={entity.value}
                             position={entity.position}
                             state={entity.state}
                         />
@@ -89,6 +100,9 @@ function App() {
                 if (entity.type === 'tile') {
                     return <GlassTile key={entity.id} {...entity} />;
                 }
+                if (entity.type === 'sphere') {
+                    return <Sphere key={entity.id} {...entity} />;
+                }
                 return null;
             })}
           </group>
@@ -107,17 +121,30 @@ function App() {
       {/* 3. UI Layer (On Top) */}
       <div className="absolute inset-0 z-20 pointer-events-none">
         
-        {/* Top Left: Title (Dynamic) */}
-        <div className="absolute top-12 left-12">
-          <h2 className="font-display text-6xl text-black">
-            Aesthete<span className="text-[#D4AF37]">.</span>
-          </h2>
-          <div className="flex items-center space-x-4 mt-2">
-            <div className="h-[1px] w-16 bg-black"></div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gray-500">
-              Figure {currentAlgo ? currentAlgo.tier.toString().padStart(2, '0') : '00'}: {currentAlgo?.name || 'Loading...'}
-            </p>
-          </div>
+        {/* Top Left: Title (Dynamic) & Info Button */}
+        <div className="absolute top-12 left-12 pointer-events-auto">
+          <div className="group flex items-center gap-4">
+             <div>
+                 <h2 className="font-display text-6xl text-black">
+                   Aesthete<span className="text-[#D4AF37]">.</span>
+                 </h2>
+                 <div className="flex items-center space-x-4 mt-2">
+                   <div className="h-[1px] w-16 bg-black"></div>
+                   <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gray-500">
+                     Figure {currentAlgo ? currentAlgo.tier.toString().padStart(2, '0') : '00'}: {currentAlgo?.name || 'Loading...'}
+                   </p>
+                 </div>
+             </div>
+
+             {/* INFO BUTTON (New) */}
+             <button 
+                 onClick={() => setShowInfo(true)}
+                 className="mt-2 w-10 h-10 rounded-full border border-gray-300 text-gray-400 hover:border-black hover:text-black hover:bg-white transition-all flex items-center justify-center cursor-pointer"
+                 title="Algorithm Details"
+             >
+                 <span className="font-display text-xl italic font-bold">i</span>
+             </button>
+           </div>
         </div>
 
         {/* Right Side: Code Card */}

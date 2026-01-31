@@ -49,8 +49,6 @@ export const Orb = ({ position, label, state = 'default' }) => {
             {/* Label (Optional: Floating Number) */}
              <group position={[0, 0.8, 0]}>
                 {/* 
-                   Note: For high-quality text in R3F we usually use <Text> from @react-three/drei 
-                   but for now, a simple Billboard with canvas texture is complex.
                    We'll leave it blank or add a simple dot.
                 */}
             </group>
