@@ -30,7 +30,7 @@
 
 ## ✺ System Status
 
-**Current Milestone: Tier 2 Complete**
+**Current Status:**
 > We are currently operating at **Tier 2** capacity, focusing on complex Dynamic Programming and Optimization problems. The engine has been upgraded to support 2D matrix visualizations with backtracking capabilities.
 
 | Metric | Status |
